@@ -108,7 +108,7 @@ class CwnAnnotator:
     
     def find_senses(self, lemma="", definition="", examples=""):
         cgu = CwnGraphUtils(self.V, self.E)
-        senses = cgu.find_senses(lemma, defintion, examples)
+        senses = cgu.find_senses(lemma, definition, examples)
         parent_senses = self.parent_cgu.find_senses(lemma, definition, examples)
         ret = annot_merger.merge(senses, parent_senses, self)
         return ret
