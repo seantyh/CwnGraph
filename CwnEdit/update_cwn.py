@@ -2,6 +2,8 @@ from typing import Tuple, Dict
 import pandas as pd
 import logging
 from CwnGraph import CwnBase, CwnLemma, CwnSense
+from CwnEdit.import_data import import_from_google_sheets
+from CwnEdit.consistency import check_consistency
 
 logger = logging.getLogger()
 
@@ -46,7 +48,7 @@ def update_cwn(sheet_url, cwn) -> MergeResult:
 
     # cwn_data: CwnGraphData
     # check_flag: bool
-    cwn_data, check_flag = check_consistency(annot_df)
+    cwn_data, check_flag = check_consistency(cwn, annot_df)
 
 
     return cwn_data, import_flag and check_flag

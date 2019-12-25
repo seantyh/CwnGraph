@@ -1,16 +1,12 @@
 import pandas as pd
-import check
+from CwnEdit import check
 from datetime import datetime
 from CwnGraph import CwnBase, CwnAnnotator, CwnSense
 from CwnGraph import CwnRelationType
 cwn = CwnBase()
 
 import logging
-
 logger = logging.getLogger("AnnotationCheck")
-
-def import_from_google_sheets(sheet_url: str):
-    
 
 ######### Import annotation spreadsheet ########
 dfs = dict()
