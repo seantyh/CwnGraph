@@ -1,4 +1,6 @@
 import re
+from CwnGraph import CwnSense
+
 # Lexical relations
 #https://docs.google.com/spreadsheets/d/1vzDlokmrsXMdGBaoSFR9lC1F9BlN8qHR6b5YDMMvv7Y/export?format=csv&gid=1660345856
 

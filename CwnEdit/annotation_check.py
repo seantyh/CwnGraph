@@ -5,6 +5,9 @@ from CwnGraph import CwnBase, CwnAnnotator, CwnSense
 from CwnGraph import CwnRelationType
 cwn = CwnBase()
 
+import logging
+
+logger = logging.getLogger("AnnotationCheck")
 
 ######### Import annotation spreadsheet ########
 dfs = dict()
