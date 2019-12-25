@@ -1,15 +1,18 @@
 import sqlite3
 import pickle
 import logging
-import CwnGraph
-from CwnGraph import CWN_Graph, CwnGraphUtils
 import sys
 import os
 import pdb
+import CwnGraph
+from CwnGraph import CWN_Graph, CwnGraphUtils
+import CwnEdit.update_cwn as ce
+from datetime import datetime
 
-logger = logging.getLogger("CwnGraph")
+logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler("cwn_graph.log", "w", encoding="UTF-8")
+timestamp = datetime.now().strftime("%y%m%d%H%M%S")
+fh = logging.FileHandler(f"cwn_graph.{timestamp}.log", encoding="UTF-8")
 ch = logging.StreamHandler()
 formatter = logging.Formatter("%(name)s [%(levelname)s]: %(message)s")
 fh.setLevel(logging.INFO)
@@ -22,7 +25,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         task = sys.argv[1]
     else:
-        task = "encode"
+        task = "update"
 
     if task == "encode":
         conn = sqlite3.connect("data/cwn-2016.sqlite")
@@ -32,7 +35,7 @@ if __name__ == "__main__":
     elif task == "query":
         with open("data/cwn_graph.pyobj", "rb") as fin:
             V, E = pickle.load(fin)
-
+    
         cgu = CwnGraphUtils(V, E)
         gid = cgu.find_glyph("田")
         print(gid)
@@ -51,6 +54,10 @@ if __name__ == "__main__":
         with open("data/cwn_graph.pyobj", "rb") as fin:
             V, E = pickle.load(fin)
             CwnGraph.io.dump_json(V, E, "data/cwn_graph")
+
+    elif task == "update":
+        logger.info("Running update script")        
+        ce.update()
 
     else:
         print("Not recognized task")
