@@ -11,6 +11,7 @@ def import_from_google_sheets(sheet_url_templ: str):
     for sheet, gid in zip(sheet_name, sheet_id):
         url = sheet_url_templ.format(gid=gid)
         df = pd.read_csv(url, dtype='str').dropna()
+        logger.info(f"retrieved {df.shape[0]} rows from {sheet}")
         annot_dfs[sheet] = df
     
     ok_flag = False
