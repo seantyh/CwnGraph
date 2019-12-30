@@ -6,7 +6,8 @@ import os
 import pdb
 import CwnGraph
 from CwnGraph import CWN_Graph, CwnGraphUtils
-import CwnEdit.update_cwn as ce
+from CwnEdit import update_cwn as ce_update
+from CwnEdit import server as ce_server
 from datetime import datetime
 
 logger = logging.getLogger()
@@ -58,7 +59,9 @@ if __name__ == "__main__":
 
     elif task == "update":
         logger.info("Running update script")        
-        ce.update()
-
+        ce_update.update()
+    elif task == "runserver":
+        app = ce_server.app
+        app.run(host="0.0.0.0", port=5200)
     else:
         print("Not recognized task")
