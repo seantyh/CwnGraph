@@ -3,7 +3,6 @@ import pickle
 import logging
 import sys
 import os
-import pdb
 import CwnGraph
 from CwnGraph import CWN_Graph, CwnGraphUtils
 from CwnEdit import update_cwn as ce_update
