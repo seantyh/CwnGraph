@@ -13,6 +13,7 @@ CORS(app)
 
 log_buf = StringIO()
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 sh = logging.StreamHandler(log_buf)
 formatter = logging.Formatter("[%(levelname)s] %(name)s - %(message)s")
 sh.setFormatter(formatter)
