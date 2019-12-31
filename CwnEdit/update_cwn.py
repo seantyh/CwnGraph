@@ -1,18 +1,34 @@
 from typing import Tuple, Dict
 import pandas as pd
 import logging
-
+from CwnGraph import CwnBase, CwnLemma, CwnSense
+from CwnEdit.import_data import import_from_google_sheets
+from CwnEdit.consistency import check_consistency
 
 logger = logging.getLogger()
 
-
-V = Dict[str, any]
-E = Dict[(str, str), any]
+NodeId = str
+EdgeId = Tuple[NodeId, NodeId]
+V = Dict[NodeId, any]
+E = Dict[EdgeId, any]
 CwnGraphData = Tuple[V, E]
 AnnotationData: Dict[str, pd.DataFrame]
 CheckResult = bool
 MergeResult = Tuple[CwnGraphData, CheckResult]
 
+# entry point
+def update():
+    cwn = CwnBase()
+    url_templ = "https://docs.google.com/spreadsheets/d/1vzDlokmrsXMdGBaoSFR9lC1F9BlN8qHR6b5YDMMvv7Y/export?format=csv&gid={gid}"
+    cwn_data, check_results = update_cwn(url_templ, cwn)        
+        
+    if check_results:
+        export_to_pickle(cwn_data)
+        export_to_json(cwn_data)
+    else:
+        logger.error("Update failed, please check the log file")
+
+    return check_results
 
 def update_cwn(sheet_url, cwn) -> MergeResult:
     # ----- annotation_check.py ----
@@ -22,7 +38,7 @@ def update_cwn(sheet_url, cwn) -> MergeResult:
     #  2b. synonym definition check
     
     # annot_df: AnnotationData
-    # import_flag: bool
+    # import_flag: bool    
     annot_df, import_flag = import_from_google_sheets(sheet_url)
 
     # ----------------------------
@@ -32,7 +48,7 @@ def update_cwn(sheet_url, cwn) -> MergeResult:
 
     # cwn_data: CwnGraphData
     # check_flag: bool
-    cwn_data, check_flag = check_consistency(annot_df)
+    cwn_data, check_flag = check_consistency(cwn, annot_df)
 
 
     return cwn_data, import_flag and check_flag

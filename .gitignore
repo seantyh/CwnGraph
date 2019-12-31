@@ -1,3 +1,6 @@
+server.nohup.out
+run_server.pid
+
 __pycache__/
 .ipynb_checkpoints/
 annot/
