@@ -11,8 +11,8 @@ class CwnAnnotator:
     def __init__(self, cgu, session_name):
         self.parent_cgu = cgu
         self.name = session_name
-        self.V = {}        
-        self.E = {}
+        self.V = cgu.V.copy()    
+        self.E = cgu.E.copy()
         self.meta = {
             "session_name": session_name,
             "timestamp": "",
@@ -92,40 +92,25 @@ class CwnAnnotator:
         self.E[cwn_relation.id] = cwn_relation.data()
 
     def remove_lemma(self, cwn_lemma):
-        cwn_lemma.action = "delete"
-        self.set_lemma(cwn_lemma)
-
+        if cwn_lemma.id in self.V:
+            del self.V[cwn_lemma.id]
+            return True
+        else:
+            return False
+        
     def remove_sense(self, cwn_sense):
-        cwn_sense.action = "delete"
-        self.set_sense(cwn_sense)
+        if cwn_sense.id in self.V:
+            del self.V[cwn_sense.id]
+            return True
+        else:
+            return False
     
     def remove_relation(self, cwn_relation):
-        cwn_relation.action = "delete"
-        self.set_relation(cwn_relation)
-
-    def find_glyph(self, instr):
-        return self.parent_cgu.find_glyph(instr)
-    
-    def find_senses(self, lemma="", definition="", examples=""):
-        cgu = CwnGraphUtils(self.V, self.E)
-        senses = cgu.find_senses(lemma, definition, examples)
-        parent_senses = self.parent_cgu.find_senses(lemma, definition, examples)
-        ret = annot_merger.merge(senses, parent_senses, self)
-        return ret
-
-    def find_lemmas(self, instr_regex):
-        cgu = CwnGraphUtils(self.V, self.E)
-        lemmas = cgu.find_lemma(instr_regex)
-        parent_lemmas = self.parent_cgu.find_lemma(instr_regex)
-        ret = annot_merger.merge(lemmas, parent_lemmas, self)
-        return ret
-    
-    def find_edges(self, node_id, is_directed = True):
-        cgu = CwnGraphUtils(self.V, self.E)
-        edges = cgu.find_edges(node_id, is_directed)        
-        parent_edges = self.parent_cgu.find_edges(node_id, is_directed)
-        ret = annot_merger.merge(edges, parent_edges, self)
-        return ret
+        if cwn_relation.id in self.E:
+            del self.E[cwn_relation.id]
+            return True
+        else:
+            return False
     
     def get_node_data(self, node_id):
         node_data = self.V.get(node_id, {})
