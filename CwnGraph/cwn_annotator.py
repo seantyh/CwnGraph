@@ -4,23 +4,23 @@ from datetime import datetime
 from . import cwnio
 from . import annot_merger
 from .cwn_types import *
+from typing import List, Dict, Tuple
 from .cwn_graph_utils import CwnGraphUtils
 
 class CwnAnnotator:
     PREFIX = "annot/cwn_annot"
-    def __init__(self, cgu, session_name):
-        self.parent_cgu = cgu
-        self.name = session_name
+    def __init__(self, cgu:CwnGraphUtils, label):
+        self.label = label
         self.V = cgu.V.copy()    
         self.E = cgu.E.copy()
-        self.meta = {
-            "session_name": session_name,
+        self.tape: List[AnnotRecord] = []
+        self.meta = {            
+            "label": label,
             "timestamp": "",
-            "serial": 0,
-            "base_hash": cgu.get_hash()
+            "serial": 0
         }
                 
-        self.load(session_name)
+        self.load(label)
 
     def load(self, name): 
            
@@ -29,10 +29,7 @@ class CwnAnnotator:
             print("loading saved session from ", fpath)
             
             self.meta, self.V, self.E = \
-                cwnio.load_annot_json(fpath)
-            base_hash = self.meta.get("base_hash", "")
-            if base_hash and base_hash != self.parent_cgu.get_hash():
-                print("WARNING: loading with a different base image")
+                cwnio.load_annot_json(fpath)            
             return True
 
         else:
@@ -40,22 +37,22 @@ class CwnAnnotator:
             return False
         
     def save(self, with_timestamp=False):        
-        name = self.meta["session_name"]
+        label = self.meta["label"]
         timestamp = datetime.now().strftime("%y%m%d%H%M%S")
         self.meta["snapshot"] = timestamp
         cwnio.ensure_dir("annot")
         if with_timestamp:
             cwnio.dump_annot_json(self.meta, self.V, self.E, 
-                f"{CwnAnnotator.PREFIX}_{name}_{timestamp}.json")
+                f"{CwnAnnotator.PREFIX}_{label}_{timestamp}.json")
         else:
             cwnio.dump_annot_json(self.meta, self.V, self.E, 
-                f"{CwnAnnotator.PREFIX}_{name}.json")        
+                f"{CwnAnnotator.PREFIX}_{label}.json")        
     
     def new_node_id(self):
         serial = self.meta.get("serial", 0) + 1
-        session_name = self.meta.get("session_name", "")
+        label = self.meta.get("label", "")
         self.meta["serial"] = serial
-        return f"{session_name}_{serial:06d}"
+        return f"{label}_{serial:06d}"
 
     def create_lemma(self, lemma):
         node_id = self.new_node_id()
@@ -113,21 +110,14 @@ class CwnAnnotator:
             return False
     
     def get_node_data(self, node_id):
-        node_data = self.V.get(node_id, {})
-        if not node_data:
-            node_data = self.parent_cgu.get_node_data(node_id)
-        
+        node_data = self.V.get(node_id, {})       
         return node_data
     
     def get_edge_data(self, edge_id):
-        edge_data = self.E.get(edge_id, {})
-        if not edge_data:
-            edge_data = self.parent_cgu.get_edge_data(edge_id)
+        edge_data = self.E.get(edge_id, {})        
         
         return edge_data
-    
-    def connected(self, node_id, is_directed = True, maxConn=100, sense_only=True):
-        raise NotImplementedError("connected() is not implemented in CwnAnnotator")
+
 
     
         

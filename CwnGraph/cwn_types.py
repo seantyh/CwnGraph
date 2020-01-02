@@ -2,6 +2,9 @@ import pickle
 import hashlib
 from enum import Enum
 from .cwn_annot_types import CwnAnnotationInfo
+from collections import namedtuple
+
+AnnotRecord = namedtuple('AnnotRecord', ["action", "annot_type", "annot_id"])
 
 class CwnRelationType(Enum):
     holonym = 1
