@@ -4,17 +4,9 @@ import logging
 from CwnGraph import CwnBase, CwnLemma, CwnSense
 from CwnEdit.import_data import import_from_google_sheets
 from CwnEdit.consistency import check_consistency
+from CwnEdit.cwnedit_types import *
 
 logger = logging.getLogger()
-
-NodeId = str
-EdgeId = Tuple[NodeId, NodeId]
-V = Dict[NodeId, any]
-E = Dict[EdgeId, any]
-CwnGraphData = Tuple[V, E]
-AnnotationData: Dict[str, pd.DataFrame]
-CheckResult = bool
-MergeResult = Tuple[CwnGraphData, CheckResult]
 
 # entry point
 def update():

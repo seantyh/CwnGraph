@@ -13,6 +13,7 @@ class CwnBase(CwnGraphUtils):
             data = pickle.load(fin)
             if len(data) == 2:
                 V, E = data
+                meta = {}
             else:
                 V, E, meta = data
         super(CwnBase, self).__init__(V, E, meta)        
