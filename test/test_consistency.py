@@ -14,9 +14,7 @@ from pathlib import Path
 
 
 def test_consistency(caplog):
-    caplog.set_level(logging.INFO)
-    formatter = logging.Formatter("[%(levelname)s] %(name)s: %(message)s")
-    caplog.
+    caplog.set_level(logging.INFO)    
     cwn = CwnBase()
     basepath = Path(__file__).parent / "../data"
     annot_dfs = {
