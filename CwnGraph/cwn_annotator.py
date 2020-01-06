@@ -8,46 +8,42 @@ from typing import List, Dict, Tuple
 from .cwn_graph_utils import CwnGraphUtils
 
 class CwnAnnotator:
-    PREFIX = "annot/cwn_annot"
     def __init__(self, cgu:CwnGraphUtils, label):
         self.label = label
-        self.V = cgu.V.copy()    
+        self.V = cgu.V.copy()
         self.E = cgu.E.copy()
         self.tape: List[AnnotRecord] = []
-        self.meta = {            
+        self.meta = {
             "label": label,
-            "timestamp": "",
+            "timestamp": datetime.now().strftime("%y%m%d%H%M%S"),
             "serial": 0
-        }
-                
-        self.load(label)
+        }        
+    
+    def __repr__(self):
+        n_edit = sum(1 for x in self.tape if x.annot_action == AnnotAction.Edit)
+        n_delete = sum(1 for x in self.tape if x.annot_action == AnnotAction.Delete)
+        return f"<CwnAnnotator: {self.label}> ({n_edit} Edits, {n_delete} Deletes)"
 
-    def load(self, name): 
-           
-        fpath = f"{CwnAnnotator.PREFIX}_{name}.json"
+    def load(self, fpath):
+
         if os.path.exists(fpath):
             print("loading saved session from ", fpath)
-            
+
             self.meta, self.V, self.E = \
-                cwnio.load_annot_json(fpath)            
+                cwnio.load_annot_json(fpath)
             return True
 
         else:
-            print("Creating new session", name)
+            print("cannot find ", fpath)
             return False
-        
-    def save(self, with_timestamp=False):        
-        label = self.meta["label"]
-        timestamp = datetime.now().strftime("%y%m%d%H%M%S")
-        self.meta["snapshot"] = timestamp
-        cwnio.ensure_dir("annot")
-        if with_timestamp:
-            cwnio.dump_annot_json(self.meta, self.V, self.E, 
-                f"{CwnAnnotator.PREFIX}_{label}_{timestamp}.json")
-        else:
-            cwnio.dump_annot_json(self.meta, self.V, self.E, 
-                f"{CwnAnnotator.PREFIX}_{label}.json")        
-    
+
+    def save(self, fpath):
+        label = self.meta["label"]        
+        cwnio.ensure_dir("annot")        
+        cwnio.dump_annot_json(self.meta, self.V, self.E, fpath)
+        with open(fpath, "wb") as fout:
+            pickle.dump((self.V, self.E, self.meta), fout)
+
     def new_node_id(self):
         serial = self.meta.get("serial", 0) + 1
         label = self.meta.get("label", "")
@@ -69,9 +65,9 @@ class CwnAnnotator:
         return new_sense
 
     def create_relation(self, src_id, tgt_id, rel_type):
-        if not self.get_node_data(src_id):            
+        if not self.get_node_data(src_id):
             raise ValueError(f"{src_id} not found")
-        if not self.get_node_data(tgt_id):            
+        if not self.get_node_data(tgt_id):
             raise ValueError(f"{tgt_id} not found")
         edge_id = (src_id, tgt_id)
         new_rel = CwnRelation(edge_id, self)
@@ -94,31 +90,30 @@ class CwnAnnotator:
             return True
         else:
             return False
-        
+
     def remove_sense(self, cwn_sense):
         if cwn_sense.id in self.V:
             del self.V[cwn_sense.id]
             return True
         else:
             return False
-    
+
     def remove_relation(self, cwn_relation):
         if cwn_relation.id in self.E:
             del self.E[cwn_relation.id]
             return True
         else:
             return False
-    
+
     def get_node_data(self, node_id):
-        node_data = self.V.get(node_id, {})       
+        node_data = self.V.get(node_id, {})
         return node_data
-    
+
     def get_edge_data(self, edge_id):
-        edge_data = self.E.get(edge_id, {})        
-        
+        edge_data = self.E.get(edge_id, {})
+
         return edge_data
 
 
-    
-        
-    
+
+
