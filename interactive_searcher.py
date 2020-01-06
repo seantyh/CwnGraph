@@ -16,7 +16,7 @@ def searchByLemma(q, cwn, exact=True, printExamples=True, printSense=True, print
     for i, lemma in enumerate(lemmas):
         print()
         if printLemma:
-            print(f"{i+1}.", lemma.lemma, end="\n")
+            print(f"{i+1}.", lemma.lemma, lemma.id,  end="\n")
         for j, sense in enumerate(lemma.senses):
             if printSense:
                 print("\t" * printLemma, end="")
