@@ -1,5 +1,8 @@
 import re
 from CwnGraph import CwnSense
+import logging
+
+logger = logging.getLogger("AnnotationCheck")
 
 # Lexical relations
 #https://docs.google.com/spreadsheets/d/1vzDlokmrsXMdGBaoSFR9lC1F9BlN8qHR6b5YDMMvv7Y/export?format=csv&gid=1660345856
@@ -50,9 +53,9 @@ def check_synonym_def(df_lex_rel, df_sense, cwn):
                 elif df_newSynonym['sid'].values[0] == tgt:
                     tgt_def = df_newSynonym[df_newSynonym['sid'] == tgt]['sense_def'].values[0]
                 else:
-                    print(f'沒想過的 bug1: 同時 修改既有之sense definition & 並增加 Synonym {idx}, {row}')
+                    logger.debug(f'沒想過的 bug1: 同時 修改既有之sense definition & 並增加 Synonym {idx}, {row}')
             else:
-                print(f'沒想過的 bug2: 同時 修改既有之sense definition & 並增加 Synonym {idx}, {row}')
+                logger.debug(f'沒想過的 bug2: 同時 修改既有之sense definition & 並增加 Synonym {idx}, {row}')
 
         # Check src_def == tgt_def
         if src_def != tgt_def:
