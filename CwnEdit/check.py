@@ -18,8 +18,8 @@ def find_duplicates(df, cols=['sid_src', 'sid_tgt']):
 def is_cwn_sid(id):
     if re.match("[0-9]{8}", id):
         return True
-    else:
-        return False
+    
+    return False
 
 # Check synonym has same def
 def check_synonym_def(df_lex_rel, df_sense, cwn):
@@ -38,8 +38,8 @@ def check_synonym_def(df_lex_rel, df_sense, cwn):
         src_def = CwnSense(src, cwn).definition if is_cwn_sid(src) else df_sense[df_sense['sid'] == src]['sense_def'].values[0]
         tgt_def = CwnSense(tgt, cwn).definition if is_cwn_sid(tgt) else df_sense[df_sense['sid'] == tgt]['sense_def'].values[0]
         # Case 1 (two old senses, new relations)
-        # Deal with: Modifying Sense Definition & Adding Synonym at the same time
-        if is_cwn_sid(src) and is_cwn_sid(tgt):
+        # Deal with: Adding Synonym  & Modifying Sense Definition at the same time
+        if is_cwn_sid(src) and is_cwn_sid(tgt) and (src in df_sense['sid'].values or tgt in df_sense['sid'].values):
             df_newSynonym = df_sense[(df_sense['sid'] == src) | (df_sense['sid'] == tgt)]
             if df_newSynonym.shape[0] == 2:  # num of rows
                 src_def = df_newSynonym[df_newSynonym['sid'] == src]['sense_def'].values[0]
@@ -57,8 +57,8 @@ def check_synonym_def(df_lex_rel, df_sense, cwn):
         # Check src_def == tgt_def
         if src_def != tgt_def:
             invalid_row_idx.append(idx)
-        
-    return(df_lex_rel.iloc[invalid_row_idx])
+
+    return(df_lex_rel.loc[invalid_row_idx])
 
 """
 def has_diffDef(senses):
