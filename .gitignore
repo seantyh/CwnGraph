@@ -25,3 +25,4 @@ cwn_graph_nodes.json
 cwn_graph_edges.json
 cwn*.sqlite
 log_*.txt
+yf_test.ipynb
