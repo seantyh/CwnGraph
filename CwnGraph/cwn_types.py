@@ -2,6 +2,17 @@ import pickle
 import hashlib
 from enum import Enum
 from .cwn_annot_types import CwnAnnotationInfo
+from collections import namedtuple
+
+class AnnotAction(Enum):
+    Edit = 1
+    Delete = 2
+
+class AnnotRecord:
+    def __init__(self):
+        self.action = AnnotAction.Edit
+        self.annot_type = ""
+        self.annot_id = ""        
 
 class CwnRelationType(Enum):
     holonym = 1

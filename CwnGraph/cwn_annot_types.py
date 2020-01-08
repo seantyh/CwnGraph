@@ -3,6 +3,14 @@ class CwnAnnotationInfo:
         self.annot = {}
 
     @property
+    def author(self):
+        return self.annot.get("author", "")
+    
+    @author.setter
+    def author(self, x):
+        self.annot["author"] = x
+
+    @property
     def confidence(self):
         return self.annot.get("confidence", 1)
     

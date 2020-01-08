@@ -3,10 +3,11 @@ import re
 from .cwn_types import *
 
 class CwnGraphUtils(GraphStructure):
-    def __init__(self, V, E):
+    def __init__(self, V, E, meta={}):
         super(CwnGraphUtils, self).__init__()
         self.V = V
         self.E = E
+        self.meta = meta
         self.edge_src_index = self.build_index(E.keys(), lambda x: x[0])
         self.edge_tgt_index = self.build_index(E.keys(), lambda x: x[1])
 
