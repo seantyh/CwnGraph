@@ -31,7 +31,7 @@ def update_cwn(sheet_url, cwn) -> MergeResult:
     
     # annot_df: AnnotationData
     # import_flag: bool    
-    annot_df, import_flag = import_from_google_sheets(sheet_url)
+    annot_df, import_flag = import_from_google_sheets(sheet_url, cwn)
 
     # ----------------------------
 

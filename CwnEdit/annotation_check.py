@@ -14,7 +14,7 @@ sheet_id = ['1660345856', '1399166433', '823487049']
 sheet_name = ['lex_rel', 'sense', 'lemma']
 for sheet, gid in zip(sheet_name, sheet_id):
     url = f"https://docs.google.com/spreadsheets/d/1vzDlokmrsXMdGBaoSFR9lC1F9BlN8qHR6b5YDMMvv7Y/export?format=csv&gid={gid}"
-    df = pd.read_csv(url, dtype='str').dropna()
+    df = pd.read_csv(url, dtype='str').dropna(how='all')
     dfs[sheet] = df
 
 
