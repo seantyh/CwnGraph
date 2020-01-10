@@ -24,6 +24,8 @@ class CwnRelationType(Enum):
     nearsynonym = 7
     paranym = 8
     synonym = 9
+    instance_of = 10
+    has_instance = 11
     generic = -1
     has_sense = 91
     has_lemma = 92
@@ -40,7 +42,9 @@ class CwnRelationType(Enum):
             "異體": CwnRelationType.variant,
             "近義詞": CwnRelationType.nearsynonym,
             "類義詞": CwnRelationType.paranym,
-            "同義詞": CwnRelationType.synonym
+            "同義詞": CwnRelationType.synonym,
+            "事例": CwnRelationType.has_instance,
+            "之事例": CwnRelationType.instance_of
         }
 
         return label_map.get(zhlabel, CwnRelationType.generic)

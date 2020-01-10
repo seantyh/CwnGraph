@@ -1,6 +1,7 @@
 import logging
 from typing import Dict
-from CwnGraph import CwnAnnotator
+from CwnGraph import CwnAnnotator, CwnRelationType
+from CwnGraph import CwnLemma, CwnSense, CwnRelation
 import pandas as pd
 
 logger = logging.getLogger("AnnnotationCheck.Transform")
@@ -18,19 +19,44 @@ def import_lemmas(annot: CwnAnnotator, lemma_df: pd.DataFrame):
             logger.warning(f"Empty lemma in {lemma_data.lid}")
             ret_flag = False
             continue
-        lemma_x = annot.create_lemma(lemma)        
-        lemma_x.sno = lemma_data.lemma_sno
-        lemma_x.zhuyin = lemma_data.zhuyin
-        lemma_x.author = lemma_data["annot."]        
-        annot.set_lemma(lemma_x)
-        logger.info(lemma_x)    
-    
+        
+        if lemma_data.action == "add":
+            lemma_x = annot.create_lemma(lemma)        
+            lemma_x.sno = lemma_data.lemma_sno
+            lemma_x.zhuyin = lemma_data.zhuyin
+            lemma_x.author = lemma_data["annot."]        
+            annot.set_lemma(lemma_x)
+            logger.info(lemma_x)    
+        elif lemma_data.action == "remove":
+            lemma_x = CwnLemma(lemma_data.lid, annot.cgu)
+            annot.remove_lemma(lemma_x)
+            
     return ret_flag
 
 def import_senses(annot: CwnAnnotator, sense_df: pd.DataFrame):
     ret_flag = True
     for idx, sense_data in sense_df.iterrows():
-        sense = sense_data.sid
+        if not sense_data.definition or \
+            not sense_data.lid:
+            logger.warning(f"Incomplete sense data in {sense_data.sid}")
+        if sense_data.action == "add":
+            sense_x = annot.create_sense(sense_data.defintion)
+            sense_def = sense_data.definition
+            lid = annot.get_id(sense_data.lid)
+            sid = annot.get_id(sense_data.sid)
+            annot.create_relation(lid, sid, CwnRelationType.has_sense)
+
+            sense_x.examples = sense_data.examples.split("\n")
+            sense_x.pos = sense_data
+            sense_x.author = sense_data["annot."]
+            annot.st_sense(sense_x)
+            
+        elif sense_data.action == "delete":
+            sense_x = CwnSense(sense_data.sid, annot.cgu)
+            annot.remove_sense(sid)
+        
+
+    
         
 
 def import_relations(annot: CwnAnnotator, rel_df:pd.DataFrame):
