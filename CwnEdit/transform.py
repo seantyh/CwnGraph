@@ -22,12 +22,16 @@ def import_lemmas(annot: CwnAnnotator, lemma_df: pd.DataFrame):
         lemma_x.sno = lemma_data.lemma_sno
         lemma_x.zhuyin = lemma_data.zhuyin
         lemma_x.author = lemma_data["annot."]        
-        logger.info(lemma_x)        
+        annot.set_lemma(lemma_x)
+        logger.info(lemma_x)    
     
     return ret_flag
 
 def import_senses(annot: CwnAnnotator, sense_df: pd.DataFrame):
-    pass
+    ret_flag = True
+    for idx, sense_data in sense_df.iterrows():
+        sense = sense_data.sid
+        
 
 def import_relations(annot: CwnAnnotator, rel_df:pd.DataFrame):
     pass
