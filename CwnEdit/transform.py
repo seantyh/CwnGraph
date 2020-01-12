@@ -49,15 +49,29 @@ def import_senses(annot: CwnAnnotator, sense_df: pd.DataFrame):
             sense_x.examples = sense_data.examples.split("\n")
             sense_x.pos = sense_data
             sense_x.author = sense_data["annot."]
-            annot.st_sense(sense_x)
-            
+            annot.set_sense(sense_x)
+
         elif sense_data.action == "delete":
             sense_x = CwnSense(sense_data.sid, annot.cgu)
             annot.remove_sense(sid)
-        
-
-    
-        
 
 def import_relations(annot: CwnAnnotator, rel_df:pd.DataFrame):
-    pass
+    ret_flag = True
+    for idx, rel_data in rel_df.iterrows():
+        sid_src = rel_data.sid_src
+        sid_tgt = rel_data.sid_tgt
+        rel_type = rel_data.relation_type
+        if not rel_data.sid_src or \
+            not rel_data.sid_tgt or \
+            not rel_data.relation_type:
+            logger.warning(f"Incomplete relation data in {rel_data.sid}")
+        
+        annot.get_
+        if rel_data.action == "add":
+            rel_x = annot.create_relation(sid_src, sid_tgt, rel_type)
+            rel_x.author = rel_data["annot."]
+            annot.set_relation(rel_x)
+
+        elif rel_data.action == "delete":
+            rel_x = CwnRelation(sid_src, sid_tgt, rel_type)
+            annot.remove_sense(rel_x)
