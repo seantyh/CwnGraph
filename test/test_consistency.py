@@ -23,4 +23,4 @@ def test_consistency(caplog):
         "lex_rel": pd.read_csv(basepath/"sense_no_relation - lexical relation.csv"),
     }
     check_consistency(cwn, annot_dfs)    
-    assert False
+    assert True

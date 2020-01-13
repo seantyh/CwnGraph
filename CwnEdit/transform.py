@@ -36,7 +36,6 @@ def import_lemmas(annot: CwnAnnotator, lemma_df: pd.DataFrame):
 
 def import_senses(annot: CwnAnnotator, sense_df: pd.DataFrame):
     ret_flag = True
-    breakpoint()
     for idx, sense_data in sense_df.iterrows():
         if not sense_data.sense_def or \
             not sense_data.lid:
@@ -66,7 +65,7 @@ def import_relations(annot: CwnAnnotator, rel_df:pd.DataFrame):
     for idx, rel_data in rel_df.iterrows():
         sid_src = rel_data.sid_src
         sid_tgt = rel_data.sid_tgt
-        rel_type = rel_data.relation_type
+        rel_type = CwnRelationType[rel_data.relation_type]
         if not rel_data.sid_src or \
             not rel_data.sid_tgt or \
             not rel_data.relation_type:

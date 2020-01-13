@@ -93,7 +93,7 @@ class CwnAnnotator:
         self.set_sense(new_sense)
         return new_sense
 
-    def create_relation(self, src_id, tgt_id, rel_type):
+    def create_relation(self, src_id:str, tgt_id:str, rel_type:CwnRelationType):
         raw_ids = (src_id, tgt_id)
         annot_src_id = self.get_id(src_id)
         annot_tgt_id = self.get_id(tgt_id)        
@@ -108,7 +108,7 @@ class CwnAnnotator:
                     raw_id=raw_ids, annot_type="relation")
 
         new_rel = CwnRelation(edge_id, self)
-        new_rel.relation_type = CwnRelationType[rel_type]
+        new_rel.relation_type = rel_type
         self.set_relation(new_rel)
         return new_rel
 
