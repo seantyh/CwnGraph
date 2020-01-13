@@ -4,7 +4,8 @@ from .cwn_types import *
 class CwnChecker:
     def __init__(self, V, E):
         self.cgu = CwnGraphUtils(V, E)
-    
+        self.suggestions = []
+
     def check_synset_definitions(self):
         pass
 
