@@ -9,11 +9,11 @@ class AnnotAction(Enum):
     Delete = 2
 
 class AnnotRecord:
-    def __init__(self):
+    def __init__(self, annot_id:str, annot_type:AnnotAction, raw_id:str=None):
         self.action = AnnotAction.Edit
-        self.annot_type = ""
-        self.annot_id = ""
-        self.raw_id = ""      
+        self.annot_type = annot_type
+        self.annot_id = annot_id
+        self.raw_id = raw_id
 
 class CwnRelationType(Enum):
     holonym = 1
@@ -425,7 +425,7 @@ class CwnRelation(CwnAnnotationInfo):
     @relation_type.setter
     def relation_type(self, x):
         if not isinstance(x, CwnRelationType):
-            raise ValueError("x must be instance of CwnRelationType")
+            raise ValueError(f"{x} is not instance of CwnRelationType")
         else:
             self.edge_type = x.name
 
@@ -466,5 +466,5 @@ class GraphStructure:
         with open("data/cwn_graph.pyobj", "wb") as fout:
             pickle.dump((self.V, self.E), fout)
 
-
-
+class CwnIdNotFoundError(Exception):
+    pass
