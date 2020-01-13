@@ -25,6 +25,10 @@ class CwnAnnotator:
         n_delete = sum(1 for x in self.tape if x.action == AnnotAction.Delete)
         return f"<CwnAnnotator: {self.label}> ({n_edit} Edits, {n_delete} Deletes)"
 
+    @property
+    def data(self):
+        return (self.V, self.E)
+
     def load(self, fpath):
 
         if os.path.exists(fpath):
@@ -104,11 +108,11 @@ class CwnAnnotator:
         if not self.get_node_data(annot_tgt_id):
             raise CwnIdNotFoundError(f"{tgt_id} not found")
 
-        self.record(edge_id, AnnotAction.Delete,
+        self.record(edge_id, AnnotAction.Edit,
                     raw_id=raw_ids, annot_type="relation")
-
-        new_rel = CwnRelation(edge_id, self)
-        new_rel.relation_type = rel_type
+        
+        new_rel = CwnRelation(edge_id, self)        
+        new_rel.relation_type = rel_type        
         self.set_relation(new_rel)
         return new_rel
 
@@ -140,8 +144,8 @@ class CwnAnnotator:
         else:
             sense_id = cwn_sense
 
-        if sense_id in self.V:
-            self.record(sense_id, AnnotAction.Delete, annot_type="sense")
+        if sense_id in self.V:            
+            self.record(sense_id, AnnotAction.Delete, annot_type="sense")            
             del self.V[sense_id]
             return True
         else:

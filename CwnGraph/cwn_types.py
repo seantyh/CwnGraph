@@ -9,9 +9,9 @@ class AnnotAction(Enum):
     Delete = 2
 
 class AnnotRecord:
-    def __init__(self, annot_id:str, annot_type:AnnotAction, raw_id:str=None):
-        self.action = AnnotAction.Edit
-        self.annot_type = annot_type
+    def __init__(self, annot_id:str, annot_action:AnnotAction, raw_id:str=None):
+        self.action = annot_action
+        self.annot_type = "generic"  
         self.annot_id = annot_id
         self.raw_id = raw_id
 
@@ -423,7 +423,7 @@ class CwnRelation(CwnAnnotationInfo):
         return self.edge_type
 
     @relation_type.setter
-    def relation_type(self, x):
+    def relation_type(self, x):        
         if not isinstance(x, CwnRelationType):
             raise ValueError(f"{x} is not instance of CwnRelationType")
         else:

@@ -6,11 +6,12 @@ from CwnGraph import CwnIdNotFoundError
 import pandas as pd
 
 logger = logging.getLogger("AnnnotationCheck.Transform")
-logger.info("test log")
 def transform_dataframe(annot: CwnAnnotator, annot_dfs: Dict[str, pd.DataFrame]):
-    import_lemmas(annot, annot_dfs.get("lemma", pd.DataFrame()))
-    import_senses(annot, annot_dfs.get("sense", pd.DataFrame()))
-    import_relations(annot, annot_dfs.get("lex_rel", pd.DataFrame()))
+    ret_flag = True
+    ret_flag &= import_lemmas(annot, annot_dfs.get("lemma", pd.DataFrame()))
+    ret_flag &= import_senses(annot, annot_dfs.get("sense", pd.DataFrame()))
+    ret_flag &= import_relations(annot, annot_dfs.get("lex_rel", pd.DataFrame()))
+    return ret_flag
 
 def import_lemmas(annot: CwnAnnotator, lemma_df: pd.DataFrame):
     ret_flag = True
@@ -40,6 +41,8 @@ def import_senses(annot: CwnAnnotator, sense_df: pd.DataFrame):
         if not sense_data.sense_def or \
             not sense_data.lid:
             logger.warning(f"Incomplete sense data in {sense_data.sid}")
+            ret_flag = False
+
         if sense_data.action == "add":            
             sense_x = annot.create_sense(sense_data.sense_def, sense_data.sid)            
             
@@ -49,16 +52,19 @@ def import_senses(annot: CwnAnnotator, sense_df: pd.DataFrame):
             sense_x.author = sense_data["annot."]
             annot.set_sense(sense_x)
 
-            try:
+            try:                
                 annot.create_relation(
                     sense_data.lid, sense_data.sid,
                     CwnRelationType.has_sense)
             except CwnIdNotFoundError as ex:
                 logger.error(ex)
+                ret_flag = False
 
         elif sense_data.action == "delete":
             sense_x = CwnSense(sense_data.sid, annot.cgu)
             annot.remove_sense(sense_data.sid)
+    
+    return ret_flag
 
 def import_relations(annot: CwnAnnotator, rel_df:pd.DataFrame):
     ret_flag = True
@@ -70,6 +76,7 @@ def import_relations(annot: CwnAnnotator, rel_df:pd.DataFrame):
             not rel_data.sid_tgt or \
             not rel_data.relation_type:
             logger.warning(f"Incomplete relation data in {rel_data.sid}")
+            ret_flag = False
 
         if rel_data.action == "add":
             try:
@@ -77,9 +84,11 @@ def import_relations(annot: CwnAnnotator, rel_df:pd.DataFrame):
                 rel_x.author = rel_data["annot."]
             except CwnIdNotFoundError as ex:
                 logger.error(ex)
+                ret_flag = False
             
             annot.set_relation(rel_x)
 
         elif rel_data.action == "delete":
             rel_x = CwnRelation(sid_src, sid_tgt, rel_type)
             annot.remove_relation(rel_x)
+    return ret_flag
