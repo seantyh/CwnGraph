@@ -26,11 +26,15 @@ class CwnRelationType(Enum):
     paranym = 8
     synonym = 9
     instance_of = 10
-    has_instance = 11
-    generic = -1
+    has_instance = 11    
+    generic = -1    
     has_sense = 91
     has_lemma = 92
     has_facet = 93
+    is_synset = 94
+
+    def __repr__(self):
+        return f"<CwnRelationType: {str(self.name)}>"
 
     @staticmethod
     def from_zhLabel(zhlabel):
@@ -45,7 +49,8 @@ class CwnRelationType(Enum):
             "類義詞": CwnRelationType.paranym,
             "同義詞": CwnRelationType.synonym,
             "事例": CwnRelationType.has_instance,
-            "之事例": CwnRelationType.instance_of
+            "之事例": CwnRelationType.instance_of,
+            "同義詞集": CwnRelationType.is_synset
         }
 
         return label_map.get(zhlabel, CwnRelationType.generic)
@@ -228,6 +233,8 @@ class CwnSense(CwnAnnotationInfo):
                 node_data = cgu.get_node_data(end_node_id) 
                 if node_data.get("node_type") == "facet":
                     end_node = CwnFacet(end_node_id, cgu) 
+                elif node_data.get("node_type") == "synset":
+                    end_node = CwnSynset(end_node_id, cgu)
                 else:
                     end_node = CwnSense(end_node_id, cgu)
 
