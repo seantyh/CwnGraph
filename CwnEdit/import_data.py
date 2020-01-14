@@ -24,17 +24,23 @@ def import_from_google_sheets(sheet_url_templ: str, cwn):
         logger.info(f"retrieved {df.shape[0]} rows from {sheet}")
         annot_dfs[sheet] = df
     
-    # Check: duplicated rows
+    #------------------- Check: duplicated rows -----------------#
     for key, cols in zip(['lex_rel', 'sense', 'lemma'], [ ['sid_src', 'sid_tgt'], 'sid', 'lid' ]):
         dup_df = check.find_duplicates(annot_dfs[key], cols)
         if dup_df.shape[0] > 0:
             logging.warning(f"Duplicated rows\nSheet: `{key}`\n{dup_df.iloc[:,0:5].to_string()}")
             ok_flag = False
     
-    # Check: synonyms must have the same sense definition
+    #------------ Check: synonyms must have the same sense definition ------------#
     syn_diff_df = check.check_synonym_def(annot_dfs['lex_rel'], annot_dfs['sense'], cwn)
     if syn_diff_df.shape[0] > 0:
         logging.warning(f"Different definitions for synonyms\nSheet: `lex_rel`\n{syn_diff_df.to_string()}")
+        ok_flag = False
+    
+    #----------------- Check: valid relation typos -----------------#
+    invalid_rel_df = check.check_rel_type(annot_dfs['lex_rel'])
+    if invalid_rel_df:
+        logging.warning(f"Invalid relation types (typo?) \nSheet: `lex_rel`\n{invalid_rel_df.to_string()}")
         ok_flag = False
     
     return annot_dfs, ok_flag

@@ -1,4 +1,5 @@
 import re
+import pandas as pd
 from CwnGraph import CwnSense
 import logging
 
@@ -61,11 +62,30 @@ def check_synonym_def(df_lex_rel, df_sense, cwn):
         if src_def != tgt_def:
             invalid_row_idx.append(idx)
 
-    return(df_lex_rel.loc[invalid_row_idx])
+    return df_lex_rel.loc[invalid_row_idx]
 
-"""
-def has_diffDef(senses):
-    all_defs = [sense.definition for sense in senses]
-    unique_defs = set(all_defs)
-    return(len(unique_defs) > 1)
-"""
+
+# Check relation type validity
+def check_rel_type(df_lex_rel):
+    annot_relations = set(df_lex_rel['relation_type'])
+    valid_relations = set([
+        "holonym",
+        "antonym",
+        "meronym",
+        "hypernym",
+        "hyponym",
+        "nearsynonym",
+        "paranym",
+        "synonym"
+    ])
+
+    invalid_rows = []
+    for rel in annot_relations:
+        if rel not in valid_relations:
+            invalid_rows.append(
+                df_lex_rel[ df_lex_rel['relation_type'] == rel ]
+            )
+    if len(invalid_rows) == 0:
+        return None
+    else:
+        return pd.concat(invalid_rows)
