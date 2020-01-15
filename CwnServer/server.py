@@ -12,6 +12,7 @@ sys.path.append(str(Path(__file__).parent))
 
 app = Flask(__name__)
 CORS(app)
+app.config['JSON_AS_ASCII'] = False
 cwn = CwnBase()
 
 @app.route("/")
@@ -66,6 +67,5 @@ def search(search_text):
     return jsonify(ret_data)
 
 if __name__ == "__main__":
-    app.config['JSON_AS_ASCII'] = False
     app.run(host="0.0.0.0", port=5201, debug=True)
     
