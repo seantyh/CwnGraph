@@ -99,8 +99,11 @@ class CwnGraphUtils(GraphStructure):
                 ret.append((node_x, conn_rel, conn_node_x))
             if maxConn and len(ret) > maxConn:
                 break                        
-        return ret
+        return ret       
 
+    def has_id(self, node_id):
+        return node_id in self.V or node_id in self.E
+        
     def get_node_data(self, node_id, field_name = None):
         return self.V.get(node_id, {})
 

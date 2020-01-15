@@ -2,6 +2,7 @@
 _build/
 _static/
 _templates/
+.DS_Store
 
 server.nohup.out
 run_server.pid

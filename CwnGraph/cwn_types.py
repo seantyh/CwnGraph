@@ -9,10 +9,11 @@ class AnnotAction(Enum):
     Delete = 2
 
 class AnnotRecord:
-    def __init__(self):
-        self.action = AnnotAction.Edit
-        self.annot_type = ""
-        self.annot_id = ""        
+    def __init__(self, annot_id:str, annot_action:AnnotAction, raw_id:str=None):
+        self.action = annot_action
+        self.annot_type = "generic"  
+        self.annot_id = annot_id
+        self.raw_id = raw_id
 
 class CwnRelationType(Enum):
     holonym = 1
@@ -24,10 +25,20 @@ class CwnRelationType(Enum):
     nearsynonym = 7
     paranym = 8
     synonym = 9
-    generic = -1
+    varword = 11
+    instance_of = 12
+    has_instance = 13    
+    generic = -1    
     has_sense = 91
     has_lemma = 92
     has_facet = 93
+    is_synset = 94
+
+    def __repr__(self):
+        return f"<CwnRelationType: {str(self.name)}>"
+
+    def is_semantic_relation(self):
+        return 0 < self.value <= 20
 
     @staticmethod
     def from_zhLabel(zhlabel):
@@ -40,7 +51,10 @@ class CwnRelationType(Enum):
             "異體": CwnRelationType.variant,
             "近義詞": CwnRelationType.nearsynonym,
             "類義詞": CwnRelationType.paranym,
-            "同義詞": CwnRelationType.synonym
+            "同義詞": CwnRelationType.synonym,
+            "事例": CwnRelationType.has_instance,
+            "之事例": CwnRelationType.instance_of,
+            "同義詞集": CwnRelationType.is_synset
         }
 
         return label_map.get(zhlabel, CwnRelationType.generic)
@@ -215,18 +229,22 @@ class CwnSense(CwnAnnotationInfo):
                 
                 if not edge_x.reversed:
                     edge_type = edge_x.edge_type
-                    end_node_id = edge_x.tgt_id                    
+                    end_node_id = edge_x.tgt_id
+                    edge_direction = "forward"
                 else:
-                    edge_type = edge_x.edge_type + "(rev)"
+                    edge_type = edge_x.edge_type
                     end_node_id = edge_x.src_id
+                    edge_direction = "reversed"
                 
                 node_data = cgu.get_node_data(end_node_id) 
                 if node_data.get("node_type") == "facet":
                     end_node = CwnFacet(end_node_id, cgu) 
+                elif node_data.get("node_type") == "synset":
+                    end_node = CwnSynset(end_node_id, cgu)
                 else:
                     end_node = CwnSense(end_node_id, cgu)
 
-                relation_infos.append((edge_type, end_node))
+                relation_infos.append((edge_type, end_node, edge_direction))
 
             self._relations = relation_infos
         return self._relations
@@ -236,12 +254,8 @@ class CwnSense(CwnAnnotationInfo):
         relation_infos = self.relations
         sem_relations = []
         for rel_x in relation_infos:
-            rel_type = rel_x[0]
-            excl_types = [
-                "has_sense", "has_facet",
-                "has_lemma", "is_synset"
-            ]
-            if all(x not in rel_type for x in excl_types):
+            rel_type = CwnRelationType[rel_x[0]]
+            if rel_type.is_semantic_relation():
                 sem_relations.append(rel_x[1])
         return sem_relations
 
@@ -353,10 +367,12 @@ class CwnSynset(CwnAnnotationInfo):
                 
                 if not edge_x.reversed:
                     edge_type = edge_x.edge_type
-                    end_node_id = edge_x.tgt_id                    
+                    end_node_id = edge_x.tgt_id  
+                    edge_direction = "forward"                  
                 else:
-                    edge_type = edge_x.edge_type + "(rev)"
+                    edge_type = edge_x.edge_type
                     end_node_id = edge_x.src_id
+                    edge_directon = "reversed"
                 
                 node_data = cgu.get_node_data(end_node_id) 
                 ntype = node_data.get("node_type")
@@ -369,7 +385,7 @@ class CwnSynset(CwnAnnotationInfo):
                 else:
                     end_node = None
 
-                relation_infos.append((edge_type, end_node))
+                relation_infos.append((edge_type, end_node, edge_direction))
 
             self._relations = relation_infos
         return self._relations
@@ -418,9 +434,9 @@ class CwnRelation(CwnAnnotationInfo):
         return self.edge_type
 
     @relation_type.setter
-    def relation_type(self, x):
+    def relation_type(self, x):        
         if not isinstance(x, CwnRelationType):
-            raise ValueError("x must be instance of CwnRelationType")
+            raise ValueError(f"{x} is not instance of CwnRelationType")
         else:
             self.edge_type = x.name
 
@@ -461,5 +477,5 @@ class GraphStructure:
         with open("data/cwn_graph.pyobj", "wb") as fout:
             pickle.dump((self.V, self.E), fout)
 
-
-
+class CwnIdNotFoundError(Exception):
+    pass
