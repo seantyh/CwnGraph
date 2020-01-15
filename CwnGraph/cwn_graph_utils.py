@@ -101,6 +101,9 @@ class CwnGraphUtils(GraphStructure):
                 break                        
         return ret       
 
+    def has_id(self, node_id):
+        return node_id in self.V or node_id in self.E
+        
     def get_node_data(self, node_id, field_name = None):
         return self.V.get(node_id, {})
 

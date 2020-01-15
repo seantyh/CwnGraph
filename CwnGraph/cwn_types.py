@@ -25,8 +25,9 @@ class CwnRelationType(Enum):
     nearsynonym = 7
     paranym = 8
     synonym = 9
-    instance_of = 10
-    has_instance = 11    
+    varword = 11
+    instance_of = 12
+    has_instance = 13    
     generic = -1    
     has_sense = 91
     has_lemma = 92
@@ -35,6 +36,9 @@ class CwnRelationType(Enum):
 
     def __repr__(self):
         return f"<CwnRelationType: {str(self.name)}>"
+
+    def is_semantic_relation(self):
+        return 0 < self.value <= 20
 
     @staticmethod
     def from_zhLabel(zhlabel):
@@ -225,10 +229,12 @@ class CwnSense(CwnAnnotationInfo):
                 
                 if not edge_x.reversed:
                     edge_type = edge_x.edge_type
-                    end_node_id = edge_x.tgt_id                    
+                    end_node_id = edge_x.tgt_id
+                    edge_direction = "forward"
                 else:
-                    edge_type = edge_x.edge_type + "(rev)"
+                    edge_type = edge_x.edge_type
                     end_node_id = edge_x.src_id
+                    edge_direction = "reversed"
                 
                 node_data = cgu.get_node_data(end_node_id) 
                 if node_data.get("node_type") == "facet":
@@ -238,7 +244,7 @@ class CwnSense(CwnAnnotationInfo):
                 else:
                     end_node = CwnSense(end_node_id, cgu)
 
-                relation_infos.append((edge_type, end_node))
+                relation_infos.append((edge_type, end_node, edge_direction))
 
             self._relations = relation_infos
         return self._relations
@@ -248,12 +254,8 @@ class CwnSense(CwnAnnotationInfo):
         relation_infos = self.relations
         sem_relations = []
         for rel_x in relation_infos:
-            rel_type = rel_x[0]
-            excl_types = [
-                "has_sense", "has_facet",
-                "has_lemma", "is_synset"
-            ]
-            if all(x not in rel_type for x in excl_types):
+            rel_type = CwnRelationType[rel_x[0]]
+            if rel_type.is_semantic_relation():
                 sem_relations.append(rel_x[1])
         return sem_relations
 
@@ -365,10 +367,12 @@ class CwnSynset(CwnAnnotationInfo):
                 
                 if not edge_x.reversed:
                     edge_type = edge_x.edge_type
-                    end_node_id = edge_x.tgt_id                    
+                    end_node_id = edge_x.tgt_id  
+                    edge_direction = "forward"                  
                 else:
-                    edge_type = edge_x.edge_type + "(rev)"
+                    edge_type = edge_x.edge_type
                     end_node_id = edge_x.src_id
+                    edge_directon = "reversed"
                 
                 node_data = cgu.get_node_data(end_node_id) 
                 ntype = node_data.get("node_type")
@@ -381,7 +385,7 @@ class CwnSynset(CwnAnnotationInfo):
                 else:
                     end_node = None
 
-                relation_infos.append((edge_type, end_node))
+                relation_infos.append((edge_type, end_node, edge_direction))
 
             self._relations = relation_infos
         return self._relations
