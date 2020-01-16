@@ -3,6 +3,9 @@ import re
 from .cwn_types import *
 
 class CwnGraphUtils(GraphStructure):
+    """cwn data as graph (vertices and edges)
+    """
+
     def __init__(self, V, E, meta={}):
         super(CwnGraphUtils, self).__init__()
         self.V = V
@@ -26,6 +29,18 @@ class CwnGraphUtils(GraphStructure):
         return None
     
     def find_lemma(self, instr_regex):
+        """Find lemmas matching search pattern.
+        
+        Parameters
+        ----------
+        instr_regex : str
+            RegEx pattern to search for.
+        
+        Returns
+        -------
+        list
+            A list of :class:`CwnLemma <CwnGraph.cwn_types.CwnLemma>`.
+        """
         ret = []
         pat = re.compile(instr_regex)
         for v, vdata in self.V.items():
@@ -35,6 +50,24 @@ class CwnGraphUtils(GraphStructure):
         return ret
 
     def find_senses(self, lemma="", definition="", examples=""):
+        """Find senses with lemmas, definitions, or examples matching 
+        search patterns.
+        
+        Parameters
+        ----------
+        lemma : str, optional
+            RegEx pattern for searching the lemma of a sense, by default ""
+        definition : str, optional
+            RegEx pattern for searching the definition of a sense, by default ""
+        examples : str, optional
+            RegEx pattern for searching the examples of a sense, by default ""
+        
+        Returns
+        -------
+        list
+            A list of :class:`CwnSense <CwnGraph.cwn_types.CwnSense>` matching 
+        """
+
         lemma_re = re.compile(lemma)
         def_re = re.compile(definition)
         ex_re = re.compile(examples)
