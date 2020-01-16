@@ -100,6 +100,14 @@ class CwnGlyph(CwnAnnotationInfo):
         }
 
 class CwnLemma(CwnAnnotationInfo):
+    """Class representing a lemma.
+
+    Attributes
+    ----------
+    senses: list
+        a list of senses (:class:`CwnSense <.CwnSense>`) having this
+        lemma
+    """
     def __init__(self, nid, cgu):
         ndata = cgu.get_node_data(nid)
         self.cgu = cgu
@@ -127,6 +135,15 @@ class CwnLemma(CwnAnnotationInfo):
         return hash((self.lemma, self.zhuyin))
 
     def data(self):
+        """Retrieve all data of this lemma.
+        
+        Returns
+        -------
+        dict
+            data stored in a dictionary, including the following
+            keys: ``node_type``, ``lemma``, ``lemma_sno``, ``zhuyin``,
+            ``annot``
+        """
         data_fields = ["node_type", "lemma", "lemma_sno", "zhuyin", "annot"]
         return {
             k: self.__dict__[k] for k in data_fields
@@ -134,6 +151,20 @@ class CwnLemma(CwnAnnotationInfo):
 
     @staticmethod
     def from_word(word, cgu):
+        """Find lemmas matching search pattern.
+        
+        Parameters
+        ----------
+        word : str
+            RegEx pattern to search for.
+        cgu : CwnBase
+            See :class:`CwnBase <CwnGraph.cwn_base.CwnBase>`.
+        
+        Returns
+        -------
+        list
+            A list of :class:`CwnLemma <.CwnLemma>`.
+        """
         return cgu.find_lemma(word)
 
     @property
@@ -150,6 +181,35 @@ class CwnLemma(CwnAnnotationInfo):
 
 
 class CwnSense(CwnAnnotationInfo):
+    """Class representing a sense.
+    
+    Attributes
+    ----------
+    lemmas: list
+        a list of :class:`CwnLemma <.CwnLemma>` belonging to this sense.
+    relations: list
+        a list of tuples ``(edge_type, end_node, edge_direction)`` 
+        giving the information of the edges linked to this sense
+    semantic_relations: list
+        a list of senses or facets (:class:`CwnSense <.CwnSense>` or 
+        :class:`CwnSynset <.CwnSynset>`) related to this sense
+    hypernym: list
+        a list of hypernyms (:class:`CwnSense <.CwnSense>`) of this
+        sense.
+    hyponym: list
+        a list of hyponym (:class:`CwnSense <.CwnSense>`) of this
+        sense.
+    synset: list
+        a synset (:class:`CwnSynset <.CwnSynset>`) containing this 
+        sense.
+    synonym: list
+        a list of synonyms (:class:`CwnSense <.CwnSense>`) of this
+        sense.
+    facets: list
+        a list of sense facets (:class:`CwnFacet <.CwnFacet>`) 
+        belonging to this sense.
+    """
+
     def __init__(self, nid, cgu):
         ndata = cgu.get_node_data(nid)
         self.cgu = cgu
@@ -185,6 +245,15 @@ class CwnSense(CwnAnnotationInfo):
         return hash((self.definition, self.pos, self.src))
 
     def data(self):
+        """Retrieve all data of this sense.
+        
+        Returns
+        -------
+        dict
+            data stored in a dictionary, including the following
+            keys: ``node_type``, ``pos``, ``examples``, ``domain``,
+            ``annot``, ``def``
+        """
         data_fields = ["node_type", "pos", "examples", "domain", "annot"]
         data_dict= {
             k: self.__dict__[k] for k in data_fields
@@ -193,6 +262,14 @@ class CwnSense(CwnAnnotationInfo):
         return data_dict
 
     def all_examples(self):
+        """Retrieve all example sentences of this sense, 
+        including examples inside each sense facet.
+        
+        Returns
+        -------
+        list
+            a list of example sentences (``str``)
+        """
         examples = self.examples
         if not examples:
             examples = []
@@ -297,6 +374,14 @@ class CwnSense(CwnAnnotationInfo):
         return facets
 
 class CwnFacet(CwnSense):
+    """Class representing a sense facet.
+
+    Attributes
+    ----------
+    sense: CwnSense
+        the sense (:class:`CwnSense <.CwnSense>`) of this 
+        sense facet
+    """
     def __init__(self, nid, cgu):
         super(CwnFacet, self).__init__(nid, cgu)
         self.node_type = "facet"
