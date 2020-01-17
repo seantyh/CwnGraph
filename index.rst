@@ -7,11 +7,16 @@ Welcome to CwnGraph's documentation!
 ====================================
 
 .. toctree::
+   :hidden:
    :glob:
    :maxdepth: 2
    :caption: Contents:
-
+   
    sphinx_doc/cwn_*
+
+
+
+.. include:: sphinx_doc/CwnQuery.rst
 
 ..
     .. automodule:: CwnGraph.cwn_graph_utils
@@ -21,6 +26,9 @@ Welcome to CwnGraph's documentation!
     .. automodule:: CwnEdit.consistency
        :members:
     .. autofunction:: CwnEdit.consistency.check_consistency
+
+
+
 
 Indices and tables
 ==================
