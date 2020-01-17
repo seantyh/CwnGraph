@@ -37,8 +37,31 @@ class CwnRelationType(Enum):
     def __repr__(self):
         return f"<CwnRelationType: {str(self.name)}>"
 
+    def __eq__(self, other):
+        if isinstance(other, CwnRelationType):
+            return other.value == self.value
+        else:
+            return False
+
     def is_semantic_relation(self):
         return 0 < self.value <= 20
+
+    def inverse(self):
+        cls = self.__class__
+        inverse_pairs = [
+            (cls.has_instance, cls.instance_of),
+            (cls.hypernym, cls.hyponym),
+            (cls.holonym, cls.meronym)
+        ]
+
+        for rel_x, rel_y in inverse_pairs:
+            if self == rel_x:
+                return rel_y
+
+            if self == rel_y:
+                return rel_x
+        
+        return None
 
     @staticmethod
     def from_zhLabel(zhlabel):
