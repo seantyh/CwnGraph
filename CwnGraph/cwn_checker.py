@@ -81,6 +81,7 @@ class CwnChecker:
         for synset_id, synset_data in synset_iter:
             synset_x = CwnSynset(synset_id, self.cgu)
             senses = synset_x.senses
+            syn_relations = synset_x.semantic_relations
             if not senses:
                 self.suggests(csg.SYN_NO_SENSE, synset_x.id)
             
@@ -92,15 +93,32 @@ class CwnChecker:
             grp_iter = groupby(senses, lambda x: x.definition)
             def_groups = [(grp_id, list(members)) for grp_id, members in grp_iter]
             def_groups = sorted(def_groups, key=lambda x: len(x[1]), reverse=True)
-            for grp_id, members in def_groups:
-                for mem_x in members:
-                    if grp_id != mem_x.definition:
-                        self.suggests(
-                            csg.SYN_WRONG_DEF, (mem_x.id, grp_id)
-                        )
-        
 
+            for grp_def, members in def_groups:
+                if grp_def != synset_x.definition:
+                    for mem_x in members:                    
+                        # the sense definition is different than the synset's
+                        self.suggests(
+                            csg.SYN_WRONG_DEF, (mem_x.id, synset_x.definition)
+                        )
+                else:
+                    # sense definition is the same, then check the synset's relations
+                    self.check_synset_relations(synset_x, members)
+
+def check_synset_relations(self, synset: CwnSynset, synset_members: List[CwnSense]):
+    synset_relations = set(synset.semantic_relations)
+    suggest_rel = set()
+    for mem_x in synset_members:
+        rel_x = set(mem_x.semantic_relations)
+        if rel_x == synset_relations:
+            continue
+        diff_syn_rel = synset_relations.difference(rel_x)
+        diff_rel_x = rel_x.difference(synset_relations)
+
+        suggest_rel.add((synset.id, r[1], r[0]) for r in diff_syn_rel)
         
+        if diff_syn_rel:
+            self.suggests()
 
 
 
