@@ -17,12 +17,33 @@ class CwnCheckerSuggestion(Enum):
 csg = CwnCheckerSuggestion
 
 class CwnChecker:
+    def __init__(self):
+        pass
+
+    def collect_check_results()
+
+class CwnCheckerBase:
+    def check(self):
+        raise NotImplementedError("implement check() in the inherited class")
+
+    def suggestions(self):
+        raise NotImplementedError("implement suggestions in the inherited class")
+
+
+class CwnCheckerSynset(CwnChecker):
     def __init__(self, V, E):
         self.cgu = CwnGraphUtils(V, E)
-        self.suggestions = []
+        self._suggestions = []
+
+    def check(self):
+        self.check_synset_definitions()
+        self.check_synset_consistency()
+        self.check_inverse_relations()
+    def suggestions(self):
+        return self._suggestions
 
     def suggests(self, suggest_type: CwnCheckerSuggestion, supp_data: any):
-        self.suggestions.append(
+        self._suggestions.append(
             (suggest_type, supp_data)
         )
 
