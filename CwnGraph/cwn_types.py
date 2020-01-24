@@ -464,6 +464,10 @@ class CwnSynset(CwnAnnotationInfo):
         return hash(self.gloss)
     
     @property
+    def definition(self):
+        return self.gloss
+        
+    @property
     def relations(self):
         if self._relations is None:
             cgu = self.cgu
