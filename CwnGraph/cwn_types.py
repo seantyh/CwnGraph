@@ -356,7 +356,7 @@ class CwnSense(CwnAnnotationInfo):
         for rel_x in relation_infos:
             rel_type = CwnRelationType[rel_x[0]]
             if rel_type.is_semantic_relation():
-                sem_relations.append(rel_x[1])
+                sem_relations.append(rel_x)
         return sem_relations
 
     @property
@@ -497,6 +497,16 @@ class CwnSynset(CwnAnnotationInfo):
 
             self._relations = relation_infos
         return self._relations
+
+    @property
+    def semantic_relations(self):
+        relation_infos = self.relations
+        sem_relations = []
+        for rel_x in relation_infos:
+            rel_type = CwnRelationType[rel_x[0]]
+            if rel_type.is_semantic_relation():
+                sem_relations.append(rel_x)
+        return sem_relations
 
     @property
     def senses(self):
