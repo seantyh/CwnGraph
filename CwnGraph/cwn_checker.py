@@ -8,19 +8,6 @@ from .cwn_types import *
 
 logger = logging.getLogger("CwnGraph.CwnChecker")
 
-class CwnCheckerSuggestion(Enum):
-    MISSING_SYNSET = auto()
-    NO_SYNSET = auto()
-    SYN_NO_SENSE = auto()
-    SYN_WRONG_DEF = auto()
-    SYN_MISSING_REL = auto()
-    SYN_REL_DIFF = auto()
-    INVERSE_ERROR = auto()
-    INVERSE_NOT_EXISTS = auto()
-csg = CwnCheckerSuggestion
-
-SuggestionData = Tuple[CwnCheckerSuggestion, any]
-
 class CwnCheckerBase:
     def check(self):
         raise NotImplementedError("implement check() in the inherited class")
@@ -36,6 +23,8 @@ class CwnChecker:
     def add_checker(self, checker: CwnCheckerBase):
         if issubclass(checker, CwnCheckerBase):
             self.checkers_cls.append(checker)
+        else:
+            logger.error("Not a subclass of CwnCheckerBase")
         
     def check(self) -> Dict[CwnCheckerSuggestion, SuggestionData]:
         suggestions = []
@@ -54,7 +43,7 @@ class CwnChecker:
         return sugg_map
 
 
-class CwnCheckerSynset(CwnChecker):
+class CwnCheckerSynset(CwnCheckerBase):
     """
     Check consistency among synset/sense relations (AnnotationData -> CwnGraphData)
     

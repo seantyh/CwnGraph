@@ -1,100 +1,8 @@
-import pickle
-import hashlib
-from enum import Enum
+from enum import Enum, auto
 from .cwn_annot_types import CwnAnnotationInfo
+from .cwn_relation_types import CwnRelationType
 from collections import namedtuple
 
-class AnnotAction(Enum):
-    Edit = 1
-    Delete = 2
-
-class AnnotRecord:
-    def __init__(self, annot_id:str, annot_action:AnnotAction, raw_id:str=None):
-        self.action = annot_action
-        self.annot_type = "generic"  
-        self.annot_id = annot_id
-        self.raw_id = raw_id
-
-class CwnRelationType(Enum):
-    holonym = 1
-    antonym = 2
-    meronym = 3
-    hypernym = 4
-    hyponym = 5
-    variant = 6
-    nearsynonym = 7
-    paranym = 8
-    synonym = 9
-    varword = 11
-    instance_of = 12
-    has_instance = 13    
-    generic = -1    
-    has_sense = 91
-    has_lemma = 92
-    has_facet = 93
-    is_synset = 94
-
-    def __repr__(self):
-        return f"<CwnRelationType: {str(self.name)}>"
-
-    def __eq__(self, other):
-        if isinstance(other, CwnRelationType):
-            return other.value == self.value
-        else:
-            return False
-
-    def is_semantic_relation(self):
-        return 0 < self.value <= 20
-
-    def inverse(self):
-        cls = self.__class__
-        inverse_pairs = [
-            (cls.has_instance, cls.instance_of),
-            (cls.hypernym, cls.hyponym),
-            (cls.holonym, cls.meronym)
-        ]
-
-        for rel_x, rel_y in inverse_pairs:
-            if self == rel_x:
-                return rel_y
-
-            if self == rel_y:
-                return rel_x
-        
-        return None
-
-    @staticmethod
-    def from_zhLabel(zhlabel):
-        label_map = {
-            "全體詞": CwnRelationType.holonym,
-            "反義詞": CwnRelationType.antonym,
-            "部分詞": CwnRelationType.meronym,
-            "上位詞": CwnRelationType.hypernym,
-            "下位詞": CwnRelationType.hyponym,
-            "異體": CwnRelationType.variant,
-            "近義詞": CwnRelationType.nearsynonym,
-            "類義詞": CwnRelationType.paranym,
-            "同義詞": CwnRelationType.synonym,
-            "事例": CwnRelationType.has_instance,
-            "之事例": CwnRelationType.instance_of,
-            "同義詞集": CwnRelationType.is_synset
-        }
-
-        return label_map.get(zhlabel, CwnRelationType.generic)
-
-class CwnNode:
-    def __init__(self):
-        self.id = None
-        self.node_type = None
-
-    def data(self):
-        raise NotImplementedError("abstract method: CwnNode.data")
-
-    def __eq__(self, other):
-        raise NotImplementedError()
-
-    def __hash__(self):
-        raise NotImplementedError()
 
 class CwnGlyph(CwnAnnotationInfo):
     def __init__(self, nid, cgu):
@@ -466,7 +374,7 @@ class CwnSynset(CwnAnnotationInfo):
     @property
     def definition(self):
         return self.gloss
-        
+
     @property
     def relations(self):
         if self._relations is None:
@@ -517,87 +425,3 @@ class CwnSynset(CwnAnnotationInfo):
         relation_infos = self.relations
         senses = [x[1] for x in relation_infos if x[0].startswith("is_synset")]
         return senses
-
-
-class CwnRelation(CwnAnnotationInfo):
-    def __init__(self, eid, cgu, reversed=False):
-        edata = cgu.get_edge_data(eid)
-        self.cgu = cgu
-        self.id = eid
-        self.edge_type = edata.get("edge_type", "generic")
-        self.annot = {}
-        self.reversed = reversed
-
-    def __repr__(self):
-        src_id = self.id[0]
-        tgt_id = self.id[1]
-        if not self.reversed:
-            return f"<CwnRelation> {self.edge_type}: {src_id} -> {tgt_id}"
-        else:
-            return f"<CwnRelation> {self.edge_type}(rev): {tgt_id} <- {src_id}"
-
-    def data(self):
-        data_fields = ["edge_type", "annot"]
-        data_dict= {
-            k: self.__dict__[k] for k in data_fields
-        }
-        return data_dict
-
-    @property
-    def src_id(self):
-        return self.id[0]
-
-    @property
-    def tgt_id(self):
-        return self.id[1]
-
-    @property
-    def relation_type(self):
-        return self.edge_type
-
-    @relation_type.setter
-    def relation_type(self, x):        
-        if not isinstance(x, CwnRelationType):
-            raise ValueError(f"{x} is not instance of CwnRelationType")
-        else:
-            self.edge_type = x.name
-
-class GraphStructure:
-    def __init__(self):
-        self.V = {}
-        self.E = {}
-        self.meta = {}
-        self._hash = None
-
-    def compute_dict_hash(self, dict_obj):        
-        m = hashlib.sha1()
-        for k, value in sorted(dict_obj.items()):
-            if isinstance(value, dict):
-                m.update(pickle.dumps(k))                
-                value_hash = self.compute_dict_hash(value)
-                m.update(value_hash.encode())                 
-            else:
-                m.update(pickle.dumps((k, value)))                                       
-        hash_value = m.hexdigest()
-        return hash_value
-
-    def get_hash(self):
-        if not self._hash:
-            Vhash = self.compute_dict_hash(self.V)
-            Ehash = self.compute_dict_hash(self.E)
-            m = hashlib.sha1()
-            m.update(Vhash.encode())
-            m.update(Ehash.encode())
-            self._hash = m.hexdigest()        
-        hashStr = self._hash[:6]
-        return hashStr
-
-    def export(self):
-        print("export Graph ", self.get_hash())
-        print("export to cwn_graph.pyobj, "
-              "you may need to install it with CwnBase.install_cwn()")
-        with open("data/cwn_graph.pyobj", "wb") as fout:
-            pickle.dump((self.V, self.E), fout)
-
-class CwnIdNotFoundError(Exception):
-    pass
